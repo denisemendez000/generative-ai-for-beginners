@@ -5,8 +5,16 @@ import dotenv
 # import dotenv
 dotenv.load_dotenv()
 
+api_key = os.getenv('OAI_KEY')
+#deployment = os.environ['OAI_KEY
+#  ']
+
+print(api_key)  # This should print your API key
+#print(deployment)  # This should print your API key
+
+
 # configure Azure OpenAI service client 
-client = OpenAI()
+client = OpenAI(api_key=api_key)
 
 #deployment=os.environ['OPENAI_DEPLOYMENT']
 deployment="gpt-3.5-turbo"

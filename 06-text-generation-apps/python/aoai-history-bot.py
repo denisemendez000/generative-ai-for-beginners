@@ -10,7 +10,7 @@ api_key = os.getenv('DAMAI')
 deployment = os.environ['AZURE_OPENAI_DEPLOYMENT']
 endpoint = os.getenv('AZURE_OPENAI_ENDPOINT')
 
-print(api_key)  # This should print your API key
+
 print(deployment)  # This should print your deployment key
 print(endpoint)  # This should print your deployment key
 

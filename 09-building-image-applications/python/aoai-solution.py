@@ -1,4 +1,5 @@
 from openai import AzureOpenAI
+from openai import OpenAI
 import os
 import requests
 from PIL import Image
@@ -8,18 +9,24 @@ import json
 # import dotenv
 dotenv.load_dotenv()
 
- 
+version = "2024-05-01-preview"
+api_key=os.getenv('DAMAI')
+endpoint="https://damailearning.openai.azure.com/"
+model =  os.environ['AZURE_OPENAI_IMAGES_DEPLOYMENT']
+print(model)
+print(endpoint)
+print(version)
 
 # Assign the API version (DALL-E is currently supported for the 2023-06-01-preview API version only)
 client = AzureOpenAI(
-  api_key=os.environ['AZURE_OPENAI_API_KEY'],  # this is also the default, it can be omitted
-  api_version = "2023-12-01-preview",
-  azure_endpoint=os.environ['AZURE_OPENAI_ENDPOINT'] 
+  api_key=os.getenv('DAMAI'),  # this is also the default, it can be omitted
+  api_version = version,
+  azure_endpoint=endpoint
   )
 
-model = os.environ['AZURE_OPENAI_DEPLOYMENT']
 
-disallow_list = "swords, violence, blood, gore, nudity, sexual content, adult content, adult themes, adult language, adult humor, adult jokes, adult situations, adult"
+
+# disallow_list = "swords, violence, blood, gore, nudity, sexual content, adult content, adult themes, adult language, adult humor, adult jokes, adult situations, adult"
 
 meta_prompt = f"""You are an assistant designer that creates images for children. 
 
@@ -32,7 +39,8 @@ The image needs to be in landscape orientation.
 The image needs to be in a 16:9 aspect ratio. 
 
 Do not consider any input from the following that is not safe for work or appropriate for children. 
-{disallow_list}"""
+nothing"""
+#{disallow_list}"""
 
 prompt = f"""{meta_prompt}
 Generate monument of the Arc of Triumph in Paris, France, in the evening light with a small child holding a Teddy looks on.
@@ -62,6 +70,7 @@ try:
 
     # Retrieve the generated image
     image_url = generation_response["data"][0]["url"]  # extract image URL from response
+    print("URL: ", image_url)
     generated_image = requests.get(image_url).content  # download the image
     with open(image_path, "wb") as image_file:
         image_file.write(generated_image)
@@ -79,21 +88,24 @@ finally:
 # ---creating variation below---
 
 
+oa_api_key = os.getenv('OAI_KEY')
 
-# response = openai.Image.create_variation(
-#   image=open(image_path, "rb"),
-#   n=1,
-#   size="1024x1024"
-# )
+# configure Azure OpenAI service client 
+oa_client = OpenAI(api_key=oa_api_key)
 
-# image_path = os.path.join(image_dir, 'generated_variation.png')
-
-# image_url = response['data'][0]['url']
-
-# generated_image = requests.get(image_url).content  # download the image
-# with open(image_path, "wb") as image_file:
-#     image_file.write(generated_image)
-
-# # Display the image in the default image viewer
-# image = Image.open(image_path)
-# image.show()
+# DALL·E 2 is no longer accepting new customers.
+#deployment=os.environ['OPENAI_DEPLOYMENT']
+deployment="gpt-3.5-turbo"
+response = oa_client.images.create_variation(
+  image=open(image_path, "rb"),
+  n=1,
+  size="1024x1024"
+)
+image_path = os.path.join(image_dir, 'generated_variation.png')
+image_url = response['data'][0]['url']
+generated_image = requests.get(image_url).content  # download the image
+with open(image_path, "wb") as image_file:
+    image_file.write(generated_image)
+# Display the image in the default image viewer
+image = Image.open(image_path)
+image.show()
